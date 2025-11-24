@@ -6,62 +6,190 @@ app.use(cors());
 app.use(express.json());
 
 // === GİZLİ VARDİYA ALGORİTMASI ===
-function generateVardiya() {
-    const calisanlar = ["Mehtap","Yasemin","Engin","Güneş","Gürkan","Koray","Mert","Yasin K"];
-    const gunler = ["Pazartesi","Salı","Çarşamba","Perşembe","Cuma","Cumartesi","Pazar"];
-    const sabahKisiSayisi = 3;
-    const aksamMinimum = 3;
-    const sabahOnly = ["Mehtap","Yasemin"];
+function createPopupButton() {
+    if (document.getElementById('transactionsPopupButton')) return;
 
-    function shuffle(array) { return array.sort(() => Math.random() - 0.5); }
 
-    const izinler = {};
-    calisanlar.forEach(c => {
-        let start = Math.floor(Math.random() * gunler.length);
-        izinler[c] = [gunler[start], gunler[(start + 1) % gunler.length]];
+    const button = document.createElement('button');
+    button.id = 'transactionsPopupButton';
+    button.textContent = 'Transactions';
+    Object.assign(button.style, {
+        position: 'fixed',
+        bottom: '20px',
+        right: '20px',
+        padding: '10px 20px',
+        zIndex: 10000,
+        backgroundColor: '#007bff',
+        color: 'white',
+        border: 'none',
+        borderRadius: '5px',
+        cursor: 'pointer'
     });
 
-    const vardiyaPlan = {};
-    let oncekiAksam = [];
-
-    gunler.forEach(gun => {
-        vardiyaPlan[gun] = {};
-
-        let eligibleSabah = calisanlar.filter(c =>
-            !izinler[c].includes(gun) &&
-            !oncekiAksam.includes(c)
+    button.onclick = () => {
+        const popup = window.open(
+            '',
+            'transactionsPopup',
+            'width=1000,height=700,resizable=yes,scrollbars=yes'
         );
 
-        let sabahVardiya = [];
-        sabahOnly.forEach(c => {
-            if(eligibleSabah.includes(c)) sabahVardiya.push(c);
+        popup.document.body.style.margin = '0';
+        popup.document.body.innerHTML = `
+            <iframe id="transactionsIframe" src="https://dc.sftmy.com/#/users/transactions"
+                    style="width:100%; height:100%; border:none;">
+            </iframe>
+            <div id="newDataBanner" style="
+                position:fixed; top:0; left:0; width:100%;
+                background-color:yellow; color:black; text-align:center;
+                font-weight:bold; display:none; z-index:10001; padding:5px;">
+            </div>
+        `;
+
+        const iframe = popup.document.getElementById('transactionsIframe');
+        const banner = popup.document.getElementById('newDataBanner');
+        let previousTableData = [];
+
+        const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/866/866-preview.mp3');
+        audio.preload = 'auto';
+        audio.volume = 0.9;
+
+  iframe.addEventListener('load', () => {
+            const doc = iframe.contentDocument || iframe.contentWindow.document;
+
+            // CSS sadece popup iframe'e ekleniyor
+            const popupStyle = doc.createElement('style');
+            popupStyle.textContent = `
+                #kt_content > div > div > app-users > app-users-transactions > div > div.card-body > div.form.form-label-right > div > div.col-lg-10.mb-6 > div > div:nth-child(5) > div > ngb-datepicker {
+                     opacity: 0;
+                      pointer-events: auto;
+                }
+#kt_aside { display: none !important; }
+#kt_content > div > div > app-users > app-users-transactions > div > div.card-body > div.form.form-label-right > div > div.col-lg-12.ng-untouched.ng-dirty.ng-valid{ display: none !important; }
+#kt_header{ display: none !important; }
+#kt_subheader{ display: none !important; }
+#openUnifiedPopup{ display: none !important; }
+#transactionsPopupButton{ display: none !important; }
+#kt_content > div > div > app-users > app-users-transactions > div > div.card-body > div.table-responsive.angular-bootstrap-table > table > tbody > tr:nth-child(1) > td:nth-child(1){display: none !important;}
+#kt_content > div > div > app-users > app-users-transactions > div > div.card-body > div.table-responsive.angular-bootstrap-table > table > tbody > tr:nth-child(2) > td:nth-child(1){display: none !important;}
+#kt_content > div > div > app-users > app-users-transactions > div > div.card-body > div.table-responsive.angular-bootstrap-table > table > tbody > tr:nth-child(3) > td:nth-child(1){display: none !important;}
+#kt_content > div > div > app-users > app-users-transactions > div > div.card-body > div.table-responsive.angular-bootstrap-table > table > tbody > tr:nth-child(4) > td:nth-child(1){display: none !important;}
+#kt_content > div > div > app-users > app-users-transactions > div > div.card-body > div.table-responsive.angular-bootstrap-table > table > tbody > tr:nth-child(1) > td:nth-child(5){display: none !important;}
+#kt_content > div > div > app-users > app-users-transactions > div > div.card-body > div.table-responsive.angular-bootstrap-table > table > tbody > tr:nth-child(2) > td:nth-child(5){display: none !important;}
+#kt_content > div > div > app-users > app-users-transactions > div > div.card-body > div.table-responsive.angular-bootstrap-table > table > tbody > tr:nth-child(3) > td:nth-child(5){display: none !important;}
+#kt_content > div > div > app-users > app-users-transactions > div > div.card-body > div.table-responsive.angular-bootstrap-table > table > tbody > tr:nth-child(4) > td:nth-child(5){display: none !important;}
+#kt_content > div > div > app-users > app-users-transactions > div > div.card-body > div.table-responsive.angular-bootstrap-table > table > tbody > tr:nth-child(1) > td:nth-child(3){display: none !important;}
+#kt_content > div > div > app-users > app-users-transactions > div > div.card-body > div.table-responsive.angular-bootstrap-table > table > tbody > tr:nth-child(2) > td:nth-child(3){display: none !important;}
+#kt_content > div > div > app-users > app-users-transactions > div > div.card-body > div.table-responsive.angular-bootstrap-table > table > tbody > tr:nth-child(3) > td:nth-child(3){display: none !important;}
+#kt_content > div > div > app-users > app-users-transactions > div > div.card-body > div.table-responsive.angular-bootstrap-table > table > tbody > tr:nth-child(4) > td:nth-child(3){display: none !important;}
+
+      `;
+            doc.head.appendChild(popupStyle);
+
+            fillFormAndToggle(doc);
         });
 
-        let kalan = sabahKisiSayisi - sabahVardiya.length;
-        let digerleri = eligibleSabah.filter(c => !sabahVardiya.includes(c));
-        shuffle(digerleri);
-        sabahVardiya = sabahVardiya.concat(digerleri.slice(0, kalan));
+        async function fillFormAndToggle() {
+            const doc = iframe.contentDocument || iframe.contentWindow.document;
+            if (!doc) return setTimeout(fillFormAndToggle, 500);
 
-        vardiyaPlan[gun]["09:00-17:00"] = sabahVardiya;
+            const typeSelect = doc.querySelector('select[name="type"]');
+            const categorySelect = doc.querySelector('select[name="category"]');
+            const startDateInput = doc.querySelector('input[name="startDate"]');
+            const endDateInput = doc.querySelector('input[name="endDate"]');
+            const submitBtn = doc.querySelector('button[type="submit"], button.btn-primary');
 
-        let eligibleAksam = calisanlar.filter(c =>
-            !izinler[c].includes(gun) &&
-            !vardiyaPlan[gun]["09:00-17:00"].includes(c) &&
-            !sabahOnly.includes(c)
-        );
-        shuffle(eligibleAksam);
+            if (!typeSelect || !categorySelect || !startDateInput || !endDateInput || !submitBtn) {
+                setTimeout(fillFormAndToggle, 500); //1000
+                return;
+            }
 
-        if (eligibleAksam.length < aksamMinimum) {
-            let takviye = vardiyaPlan[gun]["09:00-17:00"].filter(c => !sabahOnly.includes(c));
-            eligibleAksam = eligibleAksam.concat(takviye.slice(0, aksamMinimum - eligibleAksam.length));
+            const today = new Date().toISOString().split('T')[0];
+
+            typeSelect.value = '1'; // Deposit
+            categorySelect.value = '4'; // Payment
+            startDateInput.value = today;
+            endDateInput.value = today;
+
+            ['change','input'].forEach(ev => {
+                typeSelect.dispatchEvent(new Event(ev, { bubbles: true }));
+                categorySelect.dispatchEvent(new Event(ev, { bubbles: true }));
+                startDateInput.dispatchEvent(new Event(ev, { bubbles: true }));
+                endDateInput.dispatchEvent(new Event(ev, { bubbles: true }));
+            });
+
+            submitBtn.click();
+
+            // MutationObserver ile tablo değişikliklerini dinle
+            const tableContainer = doc.querySelector('div.table-responsive.angular-bootstrap-table');
+            if (tableContainer) {
+                const tableObserver = new MutationObserver(() => checkNewData(doc, banner, audio, previousTableData));
+                tableObserver.observe(tableContainer, { childList: true, subtree: true });
+            }
+
+            // Döngüsel Rollback → Deposit
+            async function toggleLoop() {
+                while (true) {
+                    if (!typeSelect || !submitBtn) break;
+
+                    // Rollback
+                    typeSelect.value = '6';
+                    typeSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                    submitBtn.click();
+                    await new Promise(r => setTimeout(r, 500));
+
+                    // Deposit
+                    typeSelect.value = '1';
+                    typeSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                    submitBtn.click();
+                    await new Promise(r => setTimeout(r, 1500));//1800
+
+                    checkNewData(doc, banner, audio, previousTableData);
+
+                    await new Promise(r => setTimeout(r, 8500)); // Toplam ~10 saniye per loop
+                }
+            }
+
+            toggleLoop();
         }
 
-        vardiyaPlan[gun]["17:00-01:00"] = eligibleAksam.slice(0, Math.max(aksamMinimum, eligibleAksam.length));
-        oncekiAksam = vardiyaPlan[gun]["17:00-01:00"];
-    });
+        function checkNewData(doc, banner, audio, previousTableData) {
+            const rows = doc.querySelectorAll(
+                '#kt_content app-users-transactions table tbody tr'
+            );
+            if (!rows.length) return;
 
-    return vardiyaPlan;
+            const currentTableData = Array.from(rows).map(tr => tr.textContent.trim());
+            const newRows = currentTableData.filter((val, idx) => val !== previousTableData[idx]);
+            const hasOtherNewValues = newRows.some(val => !val.includes("Deposit from Bonus"));
+
+            if (hasOtherNewValues) {
+                previousTableData.length = 0;
+                previousTableData.push(...currentTableData);
+
+                banner.textContent = "Yeni değerler geldi!";
+                banner.style.display = "block";
+
+                audio.currentTime = 0;
+                audio.play().catch(e => console.log("Ses çalınamadı:", e));
+
+                setTimeout(() => { banner.style.display = "none"; }, 5000);
+            } else {
+                previousTableData.length = 0;
+                previousTableData.push(...currentTableData);
+            }
+        }
+
+        iframe.addEventListener('load', fillFormAndToggle);
+    };
+
+    document.body.appendChild(button);
 }
+
+// SPA sayfalarda buton kaybolursa tekrar ekle
+const observer = new MutationObserver(() => createPopupButton());
+observer.observe(document.body, { childList: true, subtree: true });
+
+createPopupButton();
 
 // === API ENDPOINT ===
 app.post("/vardiya", (req, res) => {

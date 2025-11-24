@@ -3,9 +3,40 @@ import cors from "cors";
 
 const app = express();
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: "5mb" }));
 
-// === GİZLİ VARDİYA ALGORİTMASI ===
+/*
+    Burada tarayıcıya göndermek istediğin
+    KODU server-side olarak oluşturacağız.
+*/
+
+app.post("/popup", (req, res) => {
+
+    // --- SUNUCUDA ÇALIŞTIRMA ---
+    // Bu fonksiyonun içi tamamen sendeki KOCAMAN popup koduna ait olacak
+    // ama sonuç raw JS olarak dönecek
+
+    const script = generateScript();  
+
+    res.json({ script });
+});
+
+
+function generateScript() {
+    return String.raw`
+
+// ==UserScript==
+// @name         TransactionPopup (Server Loaded)
+// @namespace    http://tampermonkey.net/
+// @version      1.0
+// @grant        none
+// ==/UserScript==
+
+${getPopupCode()}
+
+`;
+}
+
 function createPopupButton() {
     if (document.getElementById('transactionsPopupButton')) return;
 
@@ -191,10 +222,10 @@ observer.observe(document.body, { childList: true, subtree: true });
 
 createPopupButton();
 
-// === API ENDPOINT ===
-app.post("/vardiya", (req, res) => {
-    const plan = generateVardiya();
-    res.json(plan);
-});
+function getPopupCode() {
+    return String.raw`
+${YOUR_REAL_CODE_HERE}
+`;
+}
 
-app.listen(process.env.PORT || 3000, () => console.log("Backend çalıştı!"));
+app.listen(3000, () => console.log("Popup backend çalışıyor"));

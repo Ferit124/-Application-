@@ -9,8 +9,6 @@ app.use(express.json());
 const SECRET = "MY_SUPER_SECRET_TOKEN";
 
 // createPopupButton fonksiyonunu burada tanımlıyoruz
-(function () {
-    'use strict';
 
     function createUnifiedPopup() {
         if (document.getElementById('openUnifiedPopup')) return;

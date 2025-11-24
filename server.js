@@ -14,5 +14,4 @@ app.get("/code", (req, res) => {
     const code = fs.readFileSync("script.js", "utf8");
     res.type("text/javascript").send(code);
 });
-
 app.listen(3000, () => console.log("Server running"));

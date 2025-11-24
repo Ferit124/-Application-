@@ -172,7 +172,7 @@ app.post("/get-script", (req, res) => {
         createPopupButton();
     `;
 
-    return res.json({ code });
+     res.json({ code });
 });
 
 app.listen(3000, () => console.log("Server running on port 3000"));

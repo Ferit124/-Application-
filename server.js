@@ -167,11 +167,7 @@ app.post("/get-script", (req, res) => {
         return res.status(403).json({ error: "Unauthorized" });
     }
 
-    const code = `
-        ${createPopupButton.toString()}
-        createPopupButton();
-    `;
-
+  
      res.json({ code });
 });
 
